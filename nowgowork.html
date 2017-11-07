@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>NowGoWork 1.0 (beta)</title>
+
+	<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+	<!--Include bootstrap-->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<style type="text/css">
+		html,body,.container-fluid,.row {
+			height:100%!important;
+		}
+		.form-control {
+			box-sizing: border-box;
+			-moz-box-sizing: border-box;
+			-webkit-box-sizing: border-box;
+			border:0px!important;
+			box-shadow:none!important;
+		}
+		.wholePage {
+			height:100%!important;
+		}
+		#timeLeft {
+			font:courier new;
+			font-size:100px;
+			color:red;
+		}
+		#copy_success {
+			display:none;
+			font-size:25px;
+		}
+		h2 {
+			margin-bottom:30px;
+		}
+	</style>
+</head>
+
+
+<body>
+	<div class="container-fluid">
+		<div class='row'>
+			<div class='col-md-3 text-center col-md-push-9'>
+				<h1>NowGoWork 1.0 (beta)</h1>
+				<span id='timeLeft'></span>
+
+				<p>If you do not type anything until you see a big red zero, all your progress will be lost.</p> <br/><br/>
+				<div class='form-group'>
+					<input type='button' class='btn btn-primary btn-xs' value='Copy your text' id='copy'>
+					<span class='glyphicon glyphicon-ok text-success' id='copy_success'>
+				</div>
+				Words: <span id='wordCount'>0</span>
+				<br/><br/><br/>
+
+				<h2>Work efficiently!</h2>
+				<h3>©Danielius Šukys</h3>
+
+
+			</div>
+			<div class='col-md-9 wholePage col-md-pull-3'>
+				<textarea class='form-control wholePage' placeholder='Write something...' id='text' spellcheck='false'></textarea>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+	var mainTimeOut;
+	var counter;
+	var length = prompt("After how many seconds of no writing should I erase your text?:)");
+	var timeLeft=$('#timeLeft');
+	var text=$('#text');
+		$(document).ready(function() {
+			if(length==0 || length=="undefined" || !length)
+				length=10;
+			timeLeft.html(length);
+		});
+
+		$('#copy').click(function() {
+			var copy=$(this);
+			var copy_success=$('#copy_success');
+			copy.hide().delay(1000).show(0);
+			copy_success.show();
+			copy_success.fadeOut(1000);
+			text.select();
+			document.execCommand('copy');
+			deselect();
+		})
+		$('#text').keyup(function() {
+			removeIntervals()
+			timeLeft.html(length);
+			setIntervals();
+			countWords();
+			if(text.val()=="") {
+				clearInterval(counter);
+				timeLeft.html(length);
+			}
+			text.css('opacity',1);
+		});
+
+		function deselect() {
+			var sel = window.getSelection ? window.getSelection() : document.selection;
+			if (sel) {
+			    if (sel.removeAllRanges) {
+			        sel.removeAllRanges();
+			    } else if (sel.empty) {
+			        sel.empty();
+			    }
+			}
+		}
+		function countWords() {
+			if(text.val()=="")
+				$('#wordCount').html(0);
+			else {
+				var words=text.val().replace(/\s\s+/g, ' ').split(" ");
+				var minus=0;
+				if(text.val().slice(-1) ==" ")
+					minus+=1;
+				if(text.val().charAt(0) == " ")
+					minus+=1;
+				$('#wordCount').html(words.length-minus);
+			}
+		}
+		function removeText() {
+			text.val("");
+			countWords();
+		}
+		function count() {
+			timeLeft.html(eval(timeLeft.html()-1));
+			text.css('opacity',eval(text.css('opacity')-(1/length)));
+			if(timeLeft.html()==0) {
+				clearInterval(counter);
+				text.css('opacity',1);
+			}
+		}
+
+		function removeIntervals() {
+			clearTimeout(mainTimeOut);
+			clearInterval(counter);
+		}
+		function setIntervals() {
+			counter=setInterval(count,1000);
+			mainTimeOut=setTimeout(removeText,length*1000);
+		}
+	</script>
+</body>
+</html>
